@@ -43,7 +43,7 @@ class Ufo {
     const score = CONFIG.UFO_SCORES[game.shotsFired % CONFIG.UFO_SCORES.length];
     const ix = this.x | 0;
     game.effects.addSprite('ufoboom', ix, this.y, 24);
-    game.effects.addText(String(score), ix + 2, this.y, 80, true);
+    game.effects.addText(String(score), ix + 2, this.y, 80, true, CONFIG.COLORS.ufo);
     game.audio.ufoHit();
     this.active = false;
     this.timer = CONFIG.UFO_INTERVAL;

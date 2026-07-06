@@ -206,6 +206,21 @@ const BOMB_BLAST = [
   'X.X.X.',
 ];
 
+// Which palette entry each sprite is rendered in (default: white).
+const SPRITE_PALETTE = {
+  squid0: 'squid', squid1: 'squid',
+  crab0: 'crab', crab1: 'crab',
+  octo0: 'octo', octo1: 'octo',
+  player: 'player',
+  ufo: 'ufo', ufoboom: 'ufo',
+  pboom0: 'boom', pboom1: 'boom',
+  shotburst: 'bombS', bombburst: 'bombP',
+  bombS0: 'bombS', bombS1: 'bombS', bombS2: 'bombS', bombS3: 'bombS',
+  bombP0: 'bombP', bombP1: 'bombP', bombP2: 'bombP', bombP3: 'bombP',
+  bombR0: 'bombR', bombR1: 'bombR', bombR2: 'bombR', bombR3: 'bombR',
+  shield: 'shield',
+};
+
 // name -> { canvas, w, h, rows }
 const Sprites = {};
 
@@ -219,7 +234,7 @@ function buildSprites() {
     canvas.width = w;
     canvas.height = h;
     const g = canvas.getContext('2d');
-    g.fillStyle = '#ffffff';
+    g.fillStyle = CONFIG.COLORS[SPRITE_PALETTE[name]] || '#ffffff';
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < rows[y].length; x++) {
         if (rows[y][x] === 'X') g.fillRect(x, y, 1, 1);
@@ -227,6 +242,23 @@ function buildSprites() {
     }
     Sprites[name] = { canvas, w, h, rows };
   }
+  // Kill explosions in the color of the alien that died.
+  for (const key of ['squid', 'crab', 'octo']) {
+    Sprites['aboom_' + key] = tintSprite('aboom', CONFIG.COLORS[key]);
+  }
+}
+
+function tintSprite(name, color) {
+  const base = Sprites[name];
+  const canvas = document.createElement('canvas');
+  canvas.width = base.w;
+  canvas.height = base.h;
+  const g = canvas.getContext('2d');
+  g.drawImage(base.canvas, 0, 0);
+  g.globalCompositeOperation = 'source-in';
+  g.fillStyle = color;
+  g.fillRect(0, 0, base.w, base.h);
+  return { canvas, w: base.w, h: base.h, rows: base.rows };
 }
 
 function drawSprite(g, name, x, y) {

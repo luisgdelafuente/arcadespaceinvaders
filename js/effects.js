@@ -13,8 +13,8 @@ class Effects {
     });
   }
 
-  addText(text, x, y, dur, blink) {
-    this.texts.push({ text, x, y, t: 0, dur, blink: !!blink });
+  addText(text, x, y, dur, blink, color) {
+    this.texts.push({ text, x, y, t: 0, dur, blink: !!blink, color });
   }
 
   update() {
@@ -31,6 +31,7 @@ class Effects {
     }
     for (const e of this.texts) {
       if (e.blink && ((e.t >> 4) & 1)) continue;
+      g.fillStyle = e.color || CONFIG.COLORS.text;
       drawText(g, e.text, e.x, e.y);
     }
   }

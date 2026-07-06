@@ -51,6 +51,10 @@ The project is a fully static site and deploys to Netlify as-is
 - Three lives; a life is also lost if the formation reaches your line.
   One extra life at 1,500 points. Later waves start lower and shoot
   faster. High scores (top 5, with initials) persist in localStorage.
+- Neon palette rooted in the classic cabinet colors (green cannon and
+  shields, red mystery ship), with a distinct color per alien type:
+  cyan squids (30), magenta crabs (20), lime octos (10). Explosions
+  inherit the color of whatever died. Edit `CONFIG.COLORS` to retheme.
 
 ## Project structure
 

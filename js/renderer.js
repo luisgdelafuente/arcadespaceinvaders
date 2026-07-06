@@ -54,18 +54,19 @@ class Renderer {
 
     // Tinting happens on the low-res buffer so bands stay pixel-aligned.
     g.save();
+    // Faint green-white phosphor cast over the whole tube.
     g.globalCompositeOperation = 'multiply';
+    g.fillStyle = 'rgb(228,255,236)';
+    g.fillRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
     if (this.overlay) {
-      // Cabinet cellophane: warm band over the bonus-craft lane, green band
-      // over the shields, cannon, and baseline.
+      // Cabinet cellophane strips: translucent warm band over the
+      // bonus-craft lane, green band over shields, cannon, and baseline.
+      g.globalCompositeOperation = 'source-over';
+      g.globalAlpha = 0.16;
       g.fillStyle = 'rgb(255,120,80)';
       g.fillRect(0, 22, CONFIG.WIDTH, 42);
       g.fillStyle = 'rgb(80,255,110)';
       g.fillRect(0, 184, CONFIG.WIDTH, 72);
-    } else {
-      // Faint green-white phosphor cast over the whole tube.
-      g.fillStyle = 'rgb(225,255,235)';
-      g.fillRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
     }
     g.restore();
 

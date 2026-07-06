@@ -57,6 +57,28 @@ const CONFIG = {
   // Award indexed by the player's total shot count (classic hidden table).
   UFO_SCORES: [100, 50, 50, 100, 150, 100, 100, 50, 300, 100, 100, 100, 50, 150, 100],
 
+  // Palette. Rooted in the classic cabinet look (green cannon and shields,
+  // red mystery ship) with a neon accent color per alien type.
+  COLORS: {
+    squid: '#4df3ff',   // top row, 30 pts — cyan
+    crab: '#ff4da6',    // middle rows, 20 pts — magenta
+    octo: '#9dff4d',    // bottom rows, 10 pts — lime
+    player: '#39ff6e',
+    shield: '#39ff6e',
+    ufo: '#ff5348',
+    shot: '#eaffea',
+    bombS: '#ffe14d',   // aimed squiggly — yellow
+    bombP: '#ffb84d',   // column plunger — amber
+    bombR: '#ff7b4d',   // random rolling — orange
+    boom: '#ff9d4d',    // player explosion debris
+    text: '#ffffff',
+    accent: '#39ff6e',  // values, prompts, ready text
+    warn: '#ff5348',    // game over, popups, muted flag
+    osd: '#ffe14d',
+    title1: '#4df3ff',
+    title2: '#ff4da6',
+  },
+
   // Audio pacing.
   STEP_SOUND_MIN_GAP: 6,   // floor between movement pulses at high speed
 

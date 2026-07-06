@@ -78,7 +78,7 @@ class Game {
 
   _resetGround() {
     this.groundCtx.clearRect(0, 0, CONFIG.WIDTH, 2);
-    this.groundCtx.fillStyle = '#ffffff';
+    this.groundCtx.fillStyle = CONFIG.COLORS.shield;
     this.groundCtx.fillRect(0, 0, CONFIG.WIDTH, 1);
   }
 
@@ -380,7 +380,7 @@ class Game {
     if (a) {
       this.formation.kill(a);
       this._addScore(CONFIG.ALIEN_POINTS[a.type]);
-      this.effects.addSprite('aboom',
+      this.effects.addSprite('aboom_' + ALIEN_TYPES[a.type].key,
         a.x + (a.w >> 1) - 6, a.y + (a.h >> 1) - 3, CONFIG.DEATH_PAUSE_TICKS);
       this.audio.alienDie();
       this.shot = null;
@@ -507,7 +507,7 @@ class Game {
     g.clearRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
     g.fillStyle = '#000000';
     g.fillRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
-    g.fillStyle = '#ffffff';
+    g.fillStyle = CONFIG.COLORS.text;
 
     switch (this.state) {
       case State.BOOT: this._drawBoot(g); break;
@@ -516,10 +516,14 @@ class Game {
       case State.HS_ENTRY: this._drawHsEntry(g); break;
       case State.ATTRACT:
         this._drawPlayfield(g, true);
-        if ((this.tickCount >> 5) & 1) drawTextCentered(g, 'PRESS ENTER TO START', 132);
+        if ((this.tickCount >> 5) & 1) {
+          g.fillStyle = CONFIG.COLORS.accent;
+          drawTextCentered(g, 'PRESS ENTER TO START', 132);
+        }
         break;
       case State.READY:
         this._drawPlayfield(g, true);
+        g.fillStyle = CONFIG.COLORS.accent;
         if (!this.respawning) drawTextCentered(g, 'WAVE ' + padNum(this.wave, 2), 118);
         if ((this.tickCount >> 4) & 1) drawTextCentered(g, 'READY', 132);
         break;
@@ -533,12 +537,16 @@ class Game {
         break;
       case State.WAVE_CLEARED:
         this._drawPlayfield(g, true);
+        g.fillStyle = CONFIG.COLORS.accent;
         drawTextCentered(g, 'WAVE CLEARED', 118);
         break;
       case State.GAME_OVER: this._drawGameOver(g); break;
       case State.PAUSED:
         this._drawPlayfield(g, true);
-        if ((this.tickCount >> 4) & 1) drawTextCentered(g, 'PAUSED', 124, 2);
+        if ((this.tickCount >> 4) & 1) {
+          g.fillStyle = CONFIG.COLORS.osd;
+          drawTextCentered(g, 'PAUSED', 124, 2);
+        }
         break;
     }
     drawOsd(g, this);
@@ -550,7 +558,10 @@ class Game {
     this.formation.draw(g);
     for (const s of this.shields) s.draw(g);
     for (const b of this.bombs) b.draw(g);
-    if (this.shot) this.shot.draw(g);
+    if (this.shot) {
+      g.fillStyle = CONFIG.COLORS.shot;
+      this.shot.draw(g);
+    }
     if (withPlayer) this.player.draw(g);
     this.effects.draw(g);
     drawBottomHud(g, this);
@@ -567,6 +578,7 @@ class Game {
       'SYSTEM READY',
     ];
     const shown = Math.min(lines.length, 1 + (this.stateT / 22 | 0));
+    g.fillStyle = CONFIG.COLORS.accent;
     for (let i = 0; i < shown; i++) {
       drawText(g, lines[i], 34, 60 + i * 12);
     }
@@ -574,9 +586,13 @@ class Game {
 
   _drawTitle(g) {
     drawTopHud(g, this);
+    const C = CONFIG.COLORS;
     if (this.stateT < CONFIG.TITLE_MAIN_TICKS) {
+      g.fillStyle = C.title1;
       drawTextCentered(g, 'VOID', 44, 3);
+      g.fillStyle = C.title2;
       drawTextCentered(g, 'RAIDERS', 72, 3);
+      g.fillStyle = C.text;
       drawTextCentered(g, '* SCORE ADVANCE TABLE *', 116);
       const rows = [
         ['ufo', '= ? MYSTERY'],
@@ -587,24 +603,36 @@ class Game {
       for (let i = 0; i < rows.length; i++) {
         const spr = Sprites[rows[i][0]];
         drawSprite(g, rows[i][0], 74 - spr.w, 130 + i * 14 + ((8 - spr.h) >> 1));
+        g.fillStyle = C.text;
         drawText(g, rows[i][1], 82, 130 + i * 14);
       }
-      if ((this.tickCount >> 4) & 1) drawTextCentered(g, 'PRESS ENTER TO START', 196);
+      if ((this.tickCount >> 4) & 1) {
+        g.fillStyle = C.accent;
+        drawTextCentered(g, 'PRESS ENTER TO START', 196);
+      }
+      g.fillStyle = C.text;
       drawTextCentered(g, 'PRESS I FOR INSTRUCTIONS', 210);
       drawTextCentered(g, '(C) 2026 NEW WAVE ARCADE', 226);
     } else {
+      g.fillStyle = C.title1;
       drawTextCentered(g, 'HIGH SCORES', 56, 2);
       for (let i = 0; i < this.scores.table.length; i++) {
         const e = this.scores.table[i];
+        g.fillStyle = i === 0 ? C.osd : C.text;
         drawText(g, (i + 1) + '. ' + e.name.padEnd(3), 62, 92 + i * 16);
         drawText(g, padNum(e.score, 5), 128, 92 + i * 16);
       }
-      if ((this.tickCount >> 4) & 1) drawTextCentered(g, 'PRESS ENTER TO START', 196);
+      if ((this.tickCount >> 4) & 1) {
+        g.fillStyle = C.accent;
+        drawTextCentered(g, 'PRESS ENTER TO START', 196);
+      }
     }
   }
 
   _drawInstructions(g) {
+    g.fillStyle = CONFIG.COLORS.title1;
     drawTextCentered(g, 'INSTRUCTIONS', 32, 2);
+    g.fillStyle = CONFIG.COLORS.text;
     const lines = [
       ['MOVE', 'ARROWS OR A/D'],
       ['FIRE', 'SPACE'],
@@ -621,7 +649,10 @@ class Game {
     }
     drawTextCentered(g, 'DEFEND THE LINE.', 180);
     drawTextCentered(g, 'ONE SHOT IN THE AIR AT A TIME.', 192);
-    if ((this.tickCount >> 4) & 1) drawTextCentered(g, 'ENTER = START   ESC = BACK', 216);
+    if ((this.tickCount >> 4) & 1) {
+      g.fillStyle = CONFIG.COLORS.accent;
+      drawTextCentered(g, 'ENTER = START   ESC = BACK', 216);
+    }
   }
 
   _drawGameOver(g) {
@@ -629,21 +660,27 @@ class Game {
     // Typed out letter by letter, arcade style.
     const msg = 'GAME OVER';
     const n = Math.min(msg.length, 1 + (this.stateT / 8 | 0));
+    g.fillStyle = CONFIG.COLORS.warn;
     drawText(g, msg.slice(0, n),
       Math.floor((CONFIG.WIDTH - textWidth(msg, 2)) / 2), 96, 2);
     if (n === msg.length && !this.attractMode && (this.tickCount >> 4) & 1) {
+      g.fillStyle = CONFIG.COLORS.accent;
       drawTextCentered(g, 'PRESS R TO RESTART', 130);
     }
   }
 
   _drawHsEntry(g) {
     drawTopHud(g, this);
+    g.fillStyle = CONFIG.COLORS.osd;
     drawTextCentered(g, 'NEW HIGH SCORE!', 60, 2);
+    g.fillStyle = CONFIG.COLORS.accent;
     drawTextCentered(g, padNum(this.score, 5), 90);
+    g.fillStyle = CONFIG.COLORS.text;
     drawTextCentered(g, 'ENTER YOUR INITIALS', 112);
     const e = this.hsEntry;
     const cw = FONT_ADVANCE * 3;
     const x0 = Math.floor(CONFIG.WIDTH / 2 - cw * 1.5);
+    g.fillStyle = CONFIG.COLORS.title1;
     for (let i = 0; i < 3; i++) {
       const x = x0 + i * cw;
       drawText(g, e.name[i], x, 134, 3);
@@ -651,6 +688,7 @@ class Game {
         drawText(g, '_', x, 140, 3);
       }
     }
+    g.fillStyle = CONFIG.COLORS.text;
     drawTextCentered(g, 'TYPE OR USE ARROWS', 188);
     drawTextCentered(g, 'ENTER = OK', 200);
   }

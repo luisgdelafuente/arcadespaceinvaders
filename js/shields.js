@@ -20,7 +20,7 @@ class Shield {
     this.canvas.width = this.w;
     this.canvas.height = this.h;
     this.g = this.canvas.getContext('2d');
-    this.g.fillStyle = '#ffffff';
+    this.g.fillStyle = CONFIG.COLORS.shield;
     this.g.fillRect(0, 0, this.w, this.h);
     // Punch out the empty pixels of the template shape.
     for (let i = 0; i < this.mask.length; i++) {
