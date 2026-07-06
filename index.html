@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>VOID RAIDERS — an arcade fixed shooter</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="description" content="VOID RAIDERS — an original browser-based fixed shooter in the spirit of late-70s arcade machines.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='13'>&#128126;</text></svg>">
 <link rel="stylesheet" href="css/style.css">
@@ -12,9 +12,15 @@
 <div id="stage">
   <div id="frame">
     <canvas id="screen" width="224" height="256"></canvas>
-    <div id="scanlines"></div>
     <div id="vignette"></div>
   </div>
+</div>
+<div id="touch">
+  <button id="btnLeft" class="tbtn dir" aria-label="Move left">&#9664;</button>
+  <button id="btnRight" class="tbtn dir" aria-label="Move right">&#9654;</button>
+  <button id="btnPause" class="tbtn mini" aria-label="Pause">&#10073;&#10073;</button>
+  <button id="btnMute" class="tbtn mini" aria-label="Mute">&#9834;</button>
+  <button id="btnFire" class="tbtn fire" aria-label="Fire">FIRE</button>
 </div>
 <button id="fsBtn" title="Fullscreen (F)">&#x26F6;</button>
 
@@ -25,6 +31,7 @@
 <script src="js/collision.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/input.js"></script>
+<script src="js/touch.js"></script>
 <script src="js/highscores.js"></script>
 <script src="js/shields.js"></script>
 <script src="js/projectiles.js"></script>

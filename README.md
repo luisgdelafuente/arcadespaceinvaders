@@ -8,7 +8,10 @@ were created for this project.
 
 ## Run it
 
-Open `index.html` in any modern desktop browser. That's it.
+Open `index.html` in any modern browser — desktop or mobile. The game
+scales to the screen (crisp integer scaling in device pixels, so it
+stays sharp on high-DPI phones) and shows touch controls automatically
+on touch devices.
 
 Optionally serve it (identical behavior, plus persistent high scores in
 some stricter browser configurations):
@@ -22,6 +25,16 @@ The project is a fully static site and deploys to Netlify as-is
 (`netlify.toml` publishes the repository root).
 
 ## Controls
+
+**Touch devices** get on-screen controls automatically: ◀ ▶ to move, a
+FIRE button (hold to keep firing), pause and mute buttons, and tapping
+the playfield acts as Enter (start / confirm / resume). In the
+high-score entry screen, FIRE cycles the current letter, ◀ ▶ move
+between initials, and tapping the screen confirms. Portrait and
+landscape both work; in landscape the buttons float over the side
+margins so the playfield keeps full height.
+
+**Keyboard:**
 
 | Key | Action |
 | --- | --- |
@@ -67,6 +80,7 @@ js/sprites.js       original pixel art data, pre-rendered at boot
 js/collision.js     rect helpers + pixel-tight player hit boxes
 js/audio.js         Web Audio synth engine (every sound in the game)
 js/input.js         keyboard state, key-edge handling, scroll prevention
+js/touch.js         on-screen touch controls (feed the same key codes)
 js/highscores.js    persistent top-5 table (localStorage)
 js/shields.js       per-pixel destructible bunkers
 js/projectiles.js   player shot + animated enemy bombs

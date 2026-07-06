@@ -1,8 +1,9 @@
-// Presentation: the game renders monochrome-white to a fixed 224x256 buffer,
-// which is upscaled to the display canvas at an integer factor with
-// nearest-neighbor sampling. CRT character is layered on restrained:
-// phosphor tint, faint bloom, scanlines, vignette, occasional flicker, and an
-// optional colored-cellophane overlay like physical cabinet strips.
+// Presentation: the game renders to a fixed 224x256 buffer, which is
+// upscaled to the display canvas at an integer factor of DEVICE pixels
+// (nearest-neighbor), so the image is crisp on any screen density —
+// desktop monitors and high-DPI phones alike. CRT character is layered on
+// restrained: phosphor tint, faint bloom, pixel-aligned scanlines, vignette,
+// occasional flicker, and an optional colored-cellophane overlay mode.
 
 class Renderer {
   constructor(canvas) {
@@ -16,27 +17,50 @@ class Renderer {
     this.overlay = false;   // colored band overlay (O key)
     this.bloom = true;
     this.flickerT = 0;
-    this.scanlinesEl = document.getElementById('scanlines');
+    this.scanPattern = null;
     window.addEventListener('resize', () => this.resize());
+    window.addEventListener('orientationchange', () => this.resize());
     document.addEventListener('fullscreenchange', () => this.resize());
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => this.resize());
+    }
     this.resize();
   }
 
   resize() {
-    const s = Math.max(1, Math.min(
-      Math.floor(window.innerWidth * 0.98 / CONFIG.WIDTH),
-      Math.floor(window.innerHeight * 0.98 / CONFIG.HEIGHT)));
+    const dpr = window.devicePixelRatio || 1;
+    const stage = document.getElementById('stage');
+    let availW = window.innerWidth;
+    let availH = window.innerHeight;
+    if (!document.fullscreenElement && stage && stage.clientWidth > 0) {
+      availW = stage.clientWidth;
+      availH = stage.clientHeight;
+    }
+    availW *= 0.98;
+    availH *= 0.98;
+    // Integer scale in device pixels; CSS size maps it back to layout pixels.
+    const s = Math.max(1, Math.floor(Math.min(
+      availW * dpr / CONFIG.WIDTH, availH * dpr / CONFIG.HEIGHT)));
     this.scale = s;
     this.canvas.width = CONFIG.WIDTH * s;
     this.canvas.height = CONFIG.HEIGHT * s;
+    this.canvas.style.width = (CONFIG.WIDTH * s / dpr) + 'px';
+    this.canvas.style.height = (CONFIG.HEIGHT * s / dpr) + 'px';
     this.dctx.imageSmoothingEnabled = false;
-    if (this.scanlinesEl) {
-      this.scanlinesEl.style.background = s >= 2
-        ? 'repeating-linear-gradient(to bottom, rgba(255,255,255,1) 0px, ' +
-          'rgba(255,255,255,1) ' + (s - 1) + 'px, rgba(190,205,195,1) ' +
-          (s - 1) + 'px, rgba(190,205,195,1) ' + s + 'px)'
-        : 'none';
-    }
+    this._buildScanPattern();
+  }
+
+  // One dark line per game pixel row, aligned to the integer device scale.
+  _buildScanPattern() {
+    const s = this.scale;
+    if (s < 3) { this.scanPattern = null; return; }
+    const tile = document.createElement('canvas');
+    tile.width = 1;
+    tile.height = s;
+    const g = tile.getContext('2d');
+    g.fillStyle = 'rgba(0,0,0,0.20)';
+    g.fillRect(0, s - 1, 1, 1);
+    this.scanPattern = this.dctx.createPattern(tile, 'repeat');
   }
 
   toggleFullscreen() {
@@ -92,5 +116,10 @@ class Renderer {
     d.globalAlpha = alpha;
     d.drawImage(this.buffer, 0, 0, w, h);
     d.globalAlpha = 1;
+
+    if (this.scanPattern) {
+      d.fillStyle = this.scanPattern;
+      d.fillRect(0, 0, w, h);
+    }
   }
 }

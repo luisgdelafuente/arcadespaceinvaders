@@ -1,5 +1,6 @@
 /* VOID RAIDERS — cabinet chrome. The game itself renders to a 224x256
-   canvas that is upscaled with nearest-neighbor filtering in JS. */
+   canvas that is upscaled with nearest-neighbor filtering in JS.
+   On touch devices (body.touch) an on-screen control bar appears. */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -7,15 +8,25 @@ html, body {
   height: 100%;
   background: #000;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  height: 100dvh; /* mobile browser chrome */
+}
+
+#stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
-
-#stage { position: relative; }
 
 /* Slight rounding + inset shadow suggests a curved CRT glass surface. */
 #frame {
@@ -27,24 +38,26 @@ body {
     inset 0 0 70px rgba(0, 0, 0, 0.55);
 }
 
+#frame:fullscreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
 #screen {
   display: block;
   background: #000;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  touch-action: none;
 }
 
-#scanlines, #vignette {
+#vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   border-radius: inherit;
-}
-
-/* Scanline gradient is sized from JS so lines track the integer scale. */
-#scanlines { mix-blend-mode: multiply; }
-
-#vignette {
   background: radial-gradient(ellipse at center,
     transparent 58%, rgba(0, 0, 0, 0.34) 100%);
 }
@@ -66,3 +79,67 @@ body {
 }
 
 #fsBtn:hover { opacity: 1; }
+
+/* --- Touch controls (shown only when body has the .touch class) --------- */
+
+#touch { display: none; }
+
+body.touch #touch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+}
+
+.tbtn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  background: rgba(57, 255, 110, 0.07);
+  border: 1px solid #2c3a2c;
+  color: #8fd98f;
+  border-radius: 12px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+.tbtn.active { background: rgba(57, 255, 110, 0.28); }
+
+.dir { width: 72px; height: 72px; font-size: 24px; }
+
+.mini { width: 46px; height: 46px; font-size: 16px; }
+#btnPause { margin-left: auto; }
+
+.fire {
+  width: 106px;
+  height: 72px;
+  font-size: 17px;
+  letter-spacing: 2px;
+  border-color: #3a2c2c;
+  background: rgba(255, 83, 72, 0.08);
+  color: #ff9d94;
+}
+.fire.active { background: rgba(255, 83, 72, 0.3); }
+
+body.touch #fsBtn { top: 12px; bottom: auto; right: 12px; }
+
+/* Landscape phones: float the controls over the black side margins so the
+   playfield keeps the full height. */
+@media (orientation: landscape) {
+  body.touch #touch {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-width: none;
+    background: transparent;
+    pointer-events: none;
+    padding: 0 calc(14px + env(safe-area-inset-left))
+             calc(14px + env(safe-area-inset-bottom))
+             calc(14px + env(safe-area-inset-right));
+  }
+  body.touch .tbtn { pointer-events: auto; opacity: 0.55; }
+}

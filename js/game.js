@@ -1,6 +1,11 @@
 // Game orchestration: the state machine, wave setup, collisions, scoring.
 // Logic runs at a fixed 60 ticks/s; draw() renders the current state.
 
+// Prompts adapt to the input device (keyboard vs. touch).
+function startPrompt() {
+  return window.IS_TOUCH ? 'TAP TO START' : 'PRESS ENTER TO START';
+}
+
 const State = {
   BOOT: 'boot',
   TITLE: 'title',
@@ -153,13 +158,17 @@ class Game {
   // --- Boot / menus ------------------------------------------------------
 
   _tickBoot() {
-    if (this.stateT >= CONFIG.BOOT_TICKS || this.input.pressed('Enter')) {
+    if (this.stateT >= CONFIG.BOOT_TICKS || this._startPressed()) {
       this.setState(State.TITLE);
     }
   }
 
+  _startPressed() {
+    return this.input.pressed('Enter') || this.input.pressed('Space');
+  }
+
   _tickTitle() {
-    if (this.input.pressed('Enter')) { this.startGame(false); return; }
+    if (this._startPressed()) { this.startGame(false); return; }
     if (this.input.pressed('KeyI')) { this.setState(State.INSTRUCTIONS); return; }
     if (this.stateT >= CONFIG.TITLE_MAIN_TICKS + CONFIG.TITLE_SCORES_TICKS) {
       this.startGame(true); // attract demo
@@ -167,14 +176,14 @@ class Game {
   }
 
   _tickInstructions() {
-    if (this.input.pressed('Enter')) { this.startGame(false); return; }
+    if (this._startPressed()) { this.startGame(false); return; }
     if (this.input.pressed('Escape') || this.input.pressed('KeyB') || this.input.pressed('KeyI')) {
       this.setState(State.TITLE);
     }
   }
 
   _tickAttract() {
-    if (this.input.pressed('Enter')) { this.startGame(false); return; }
+    if (this._startPressed()) { this.startGame(false); return; }
     if (this.input.pressed('Escape')) { this.setState(State.TITLE); return; }
     if (this.stateT >= CONFIG.ATTRACT_MAX_TICKS) { this.setState(State.TITLE); return; }
     this._playCore(this.ai.decide(this));
@@ -456,7 +465,7 @@ class Game {
   _tickGameOver() {
     this.effects.update();
     const done = this.stateT >= CONFIG.GAME_OVER_TICKS;
-    const key = this.input.pressed('KeyR') || this.input.pressed('Enter');
+    const key = this.input.pressed('KeyR') || this._startPressed();
     if (this.attractMode) {
       if (done || key) this.setState(State.TITLE);
       return;
@@ -479,8 +488,8 @@ class Game {
       e.slot = Math.min(2, e.slot + 1);
       this.audio.uiBlip();
     }
-    if (inp.pressed('ArrowUp') || inp.pressed('ArrowDown')) {
-      const dir = inp.pressed('ArrowUp') ? 1 : -1;
+    if (inp.pressed('ArrowUp') || inp.pressed('ArrowDown') || inp.pressed('Space')) {
+      const dir = inp.pressed('ArrowDown') ? -1 : 1;
       const i = alphabet.indexOf(e.name[e.slot]);
       e.name[e.slot] = alphabet[(i + dir + alphabet.length) % alphabet.length];
       this.audio.uiBlip();
@@ -495,7 +504,8 @@ class Game {
   }
 
   _tickPaused() {
-    if (this.input.pressed('KeyP') || this.input.pressed('Escape') || this.input.pressed('Enter')) {
+    if (this.input.pressed('KeyP') || this.input.pressed('Escape') ||
+        this.input.pressed('Enter') || this.input.pressed('Space')) {
       this.setState(this.resumeState || State.PLAYING);
       this.stateT = 1;
     }
@@ -518,7 +528,7 @@ class Game {
         this._drawPlayfield(g, true);
         if ((this.tickCount >> 5) & 1) {
           g.fillStyle = CONFIG.COLORS.accent;
-          drawTextCentered(g, 'PRESS ENTER TO START', 132);
+          drawTextCentered(g, startPrompt(), 132);
         }
         break;
       case State.READY:
@@ -608,10 +618,10 @@ class Game {
       }
       if ((this.tickCount >> 4) & 1) {
         g.fillStyle = C.accent;
-        drawTextCentered(g, 'PRESS ENTER TO START', 196);
+        drawTextCentered(g, startPrompt(), 196);
       }
       g.fillStyle = C.text;
-      drawTextCentered(g, 'PRESS I FOR INSTRUCTIONS', 210);
+      if (!window.IS_TOUCH) drawTextCentered(g, 'PRESS I FOR INSTRUCTIONS', 210);
       drawTextCentered(g, '(C) 2026 NEW WAVE ARCADE', 226);
     } else {
       g.fillStyle = C.title1;
@@ -624,7 +634,7 @@ class Game {
       }
       if ((this.tickCount >> 4) & 1) {
         g.fillStyle = C.accent;
-        drawTextCentered(g, 'PRESS ENTER TO START', 196);
+        drawTextCentered(g, startPrompt(), 196);
       }
     }
   }
@@ -651,7 +661,8 @@ class Game {
     drawTextCentered(g, 'ONE SHOT IN THE AIR AT A TIME.', 192);
     if ((this.tickCount >> 4) & 1) {
       g.fillStyle = CONFIG.COLORS.accent;
-      drawTextCentered(g, 'ENTER = START   ESC = BACK', 216);
+      drawTextCentered(g,
+        window.IS_TOUCH ? 'TAP = START' : 'ENTER = START   ESC = BACK', 216);
     }
   }
 
@@ -665,7 +676,8 @@ class Game {
       Math.floor((CONFIG.WIDTH - textWidth(msg, 2)) / 2), 96, 2);
     if (n === msg.length && !this.attractMode && (this.tickCount >> 4) & 1) {
       g.fillStyle = CONFIG.COLORS.accent;
-      drawTextCentered(g, 'PRESS R TO RESTART', 130);
+      drawTextCentered(g,
+        window.IS_TOUCH ? 'TAP TO RESTART' : 'PRESS R TO RESTART', 130);
     }
   }
 
@@ -689,7 +701,12 @@ class Game {
       }
     }
     g.fillStyle = CONFIG.COLORS.text;
-    drawTextCentered(g, 'TYPE OR USE ARROWS', 188);
-    drawTextCentered(g, 'ENTER = OK', 200);
+    if (window.IS_TOUCH) {
+      drawTextCentered(g, 'FIRE = NEXT LETTER  < > = MOVE', 188);
+      drawTextCentered(g, 'TAP SCREEN = OK', 200);
+    } else {
+      drawTextCentered(g, 'TYPE OR USE ARROWS', 188);
+      drawTextCentered(g, 'ENTER = OK', 200);
+    }
   }
 }

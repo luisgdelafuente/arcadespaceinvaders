@@ -9,15 +9,19 @@
     buildSprites();
 
     const audio = new AudioEngine();
-    const renderer = new Renderer(document.getElementById('screen'));
     const scores = new HighScores();
+    let renderer = null;
     const input = new Input({
       // Audio can only start from a user gesture.
       onAny: () => audio.unlock(),
       // Fullscreen must also be requested inside the gesture handler.
-      onKeyDown: (code) => { if (code === 'KeyF') renderer.toggleFullscreen(); },
+      onKeyDown: (code) => { if (code === 'KeyF' && renderer) renderer.toggleFullscreen(); },
     });
     input.attach();
+    // Touch controls first: adding body.touch changes the layout the
+    // renderer measures on its initial resize.
+    new TouchControls(input, audio, document.getElementById('screen'));
+    renderer = new Renderer(document.getElementById('screen'));
 
     const game = new Game(audio, input, scores, renderer);
 
