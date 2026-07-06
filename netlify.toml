@@ -1,6 +1,9 @@
-# Static site — no build step. Publish the repository root.
+# Static site — no build step. Explicit base/publish so these settings win
+# over any stale "Base directory" configured in the Netlify site UI.
 [build]
-  publish = "."
+  base = "/"
+  publish = "/"
+  command = ""
 
 [[headers]]
   for = "/*"
