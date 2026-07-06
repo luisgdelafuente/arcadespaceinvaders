@@ -82,15 +82,25 @@ body {
 
 /* --- Touch controls (shown only when body has the .touch class) --------- */
 
-#touch { display: none; }
+#touch, #touchUtils { display: none; }
 
+/* Main bar: LEFT / FIRE / RIGHT, three equal buttons filling the width. */
 body.touch #touch {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
-  max-width: 560px;
+  max-width: 640px;
   padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+}
+
+/* Pause and mute live in the top-left corner (fullscreen is top-right). */
+body.touch #touchUtils {
+  display: flex;
+  gap: 8px;
+  position: fixed;
+  top: 12px;
+  left: 12px;
 }
 
 .tbtn {
@@ -108,15 +118,14 @@ body.touch #touch {
 
 .tbtn.active { background: rgba(57, 255, 110, 0.28); }
 
-.dir { width: 72px; height: 72px; font-size: 24px; }
+.dir { flex: 1 1 0; height: 78px; font-size: 26px; }
 
-.mini { width: 46px; height: 46px; font-size: 16px; }
-#btnPause { margin-left: auto; }
+.mini { width: 46px; height: 40px; font-size: 15px; opacity: 0.75; }
 
 .fire {
-  width: 106px;
-  height: 72px;
-  font-size: 17px;
+  flex: 1 1 0;
+  height: 78px;
+  font-size: 18px;
   letter-spacing: 2px;
   border-color: #3a2c2c;
   background: rgba(255, 83, 72, 0.08);
@@ -126,20 +135,12 @@ body.touch #touch {
 
 body.touch #fsBtn { top: 12px; bottom: auto; right: 12px; }
 
-/* Landscape phones: float the controls over the black side margins so the
-   playfield keeps the full height. */
+/* Landscape phones: same LEFT / FIRE / RIGHT bar below the playfield,
+   just shorter so the game keeps as much height as possible. */
 @media (orientation: landscape) {
   body.touch #touch {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    max-width: none;
-    background: transparent;
-    pointer-events: none;
-    padding: 0 calc(14px + env(safe-area-inset-left))
-             calc(14px + env(safe-area-inset-bottom))
-             calc(14px + env(safe-area-inset-right));
+    max-width: 720px;
+    padding: 6px 16px calc(8px + env(safe-area-inset-bottom));
   }
-  body.touch .tbtn { pointer-events: auto; opacity: 0.55; }
+  body.touch .dir, body.touch .fire { height: 56px; }
 }

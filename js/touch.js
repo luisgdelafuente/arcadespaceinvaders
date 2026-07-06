@@ -43,7 +43,9 @@ class TouchControls {
       audio.unlock();
       input.edge.add('Enter');
     });
-    document.getElementById('touch')
-      .addEventListener('contextmenu', (e) => e.preventDefault());
+    for (const id of ['touch', 'touchUtils']) {
+      document.getElementById(id)
+        .addEventListener('contextmenu', (e) => e.preventDefault());
+    }
   }
 }
